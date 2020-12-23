@@ -47,10 +47,7 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
-                      v-model="editedItem.id"
-                      label="ID"
-                    ></v-text-field>
+                  
                   </v-col>
 
                   <v-col
@@ -77,7 +74,7 @@
                       auto-grow
                     ></v-textarea>
                   </v-col> 
-
+      
                    <v-col
                     cols="12"
                     sm="12"
@@ -109,10 +106,35 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
-                      v-model="editedItem.estado"
-                      label="Estado"
-                    ></v-text-field>
+                  
+                  </v-col>
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                    v-if="editedIndex !== -1"
+                  >
+                    <v-row
+                      align="center"
+                      justify="space-around"
+                    >
+                      <v-btn 
+                        @click="enableArticle()" 
+                        color="success"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Habilitar
+                      </v-btn>
+                      <v-btn 
+                        @click="disableArticle()" 
+                        color="error"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Deshabilitar
+                      </v-btn>
+                    </v-row>
                   </v-col>
 
                 </v-row>
@@ -192,21 +214,22 @@ name: 'DataTableArticulo',
 data: () => ({
       dialog: false,
       dialogDelete: false,
-      cargando: false, // Cambiar a true cuando hayan registros en la base de datos
+      cargando: true, 
       headers: [
         { text: 'ID', value: 'id'},
         {
           text: 'Artículo',
           align: 'start',
           sortable: true,
-          value: 'nombre', //Igual a como se llame en el modelo
+          value: 'nombre',
         },
-        { text: 'Categoría', value: 'categoria.nombre' },
+        // { text: 'Categoría', value: 'categoria.nombre' },
         { text: 'Descripción', value: 'descripcion' },
         { text: 'Código', value: 'codigo' },
         { text: 'Estado', value: 'estado' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: 'Acciones', value: 'actions', sortable: false },
       ],
+      buttonLoading: false,
       articulos: [],
       categoria: [],
       categorias: [],
@@ -237,7 +260,7 @@ data: () => ({
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'NuevO artículo' : 'Editar artículo'
+        return this.editedIndex === -1 ? 'Nuevo artículo' : 'Editar artículo'
       },
     },
 
@@ -262,11 +285,16 @@ data: () => ({
           headers:{
             'Token': localStorage.getItem('token')
           }
-        }) // Consume la appi
+        })
         .then(
           response => {
-            this.articulo = response.data;
+            const userData = response.data.map(
+              articulo => articulo.estado === 1 ? {...articulo, estado: 'Activo'} : {...articulo, estado: 'Inactivo'}
+            );
+            this.articulos = userData;
             this.cargando = false;
+            this.list();
+            
           }
         )
         .catch(error=> {
@@ -279,7 +307,7 @@ data: () => ({
           headers:{
             'Token': localStorage.getItem('token')
           }
-        }) // Consume la appi
+        })
         .then(
           response => {
             this.categorias = response.data;
@@ -301,6 +329,41 @@ data: () => ({
         this.editedIndex = item.id
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
+      },
+       enableArticle () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/articulo/activate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.list();
+          this.buttonLoading = false;
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
+      },
+
+      disableArticle () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/articulo/deactivate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.buttonLoading = false;
+          this.list();
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
       },
 
       deleteItemConfirm () {
@@ -360,7 +423,7 @@ data: () => ({
             "nombre": this.editedItem.nombre,
             "descripcion": this.editedItem.descripcion,
             "codigo": this.editedItem.codigo,
-            "categoria": this.categoria.id, // verificar nombre en back
+            "categoria": this.categoria.nombre, // verificar nombre en back
           }, {
           headers:{
             'Token': localStorage.getItem('token')
@@ -376,9 +439,9 @@ data: () => ({
             axios.post("http://localhost:3000/api/articulo/add", { // Consume la appi
             "nombre": this.editedItem.nombre,
             "descripcion": this.editedItem.descripcion,
-            "codigo": this.editedItem.codigo
-            //"categoriaId": this.categoria.id, // verificar nombre en back
-            //"estado": 1
+            "codigo": this.editedItem.codigo,
+            "categoria": this.categoria.id
+            
           }, {
           headers:{
             'Token': localStorage.getItem('token')

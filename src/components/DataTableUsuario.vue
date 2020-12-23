@@ -48,23 +48,26 @@
                     md="12"
                   >
                     <v-text-field
-                      v-model="editedItem.id"
-                      label="ID"
-                    ></v-text-field>
-                  </v-col>
-
-                  <v-col
-                    cols="12"
-                    sm="12"
-                    md="12"
-                  >
-                    <v-text-field
                       v-model="editedItem.nombre"
                       label="Nombre"
                     ></v-text-field>
                   </v-col>
 
                   <v-col
+                    v-if="editedIndex === -1"
+                    cols="12"
+                    sm="12"
+                    md="12"
+                  >
+                    <v-text-field
+                      v-model="editedItem.password"
+                      label="Password"
+                      :type="'password'"
+                    ></v-text-field>
+                  </v-col>
+
+                  <v-col
+                    v-if="editedIndex === -1"
                     cols="12"
                     sm="12"
                     md="12"
@@ -80,10 +83,42 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
-                      v-model="editedItem.estado"
-                      label="Estado"
-                    ></v-text-field>
+                    <v-select
+                      v-model="editedItem.Rol"
+                      label="Rol"
+                      :items="rolItems"
+                      return-object
+                      single-line
+                    ></v-select>
+                  </v-col>
+
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                    v-if="editedIndex !== -1"
+                  >
+                    <v-row
+                      align="center"
+                      justify="space-around"
+                    >
+                      <v-btn 
+                        @click="enableUser()" 
+                        color="success"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Habilitar
+                      </v-btn>
+                      <v-btn 
+                        @click="disableUser()" 
+                        color="error"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Deshabilitar
+                      </v-btn>
+                    </v-row>
                   </v-col>
 
                 </v-row>
@@ -115,7 +150,7 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+              <!--v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn-->
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
@@ -163,7 +198,7 @@ name: 'DataTableUsuario',
 data: () => ({
       dialog: false,
       dialogDelete: false,
-      cargando: false, // Cambiar a true cuando hayan registros en la base de datos
+      cargando: true, 
       headers: [
         { text: 'ID', value: 'id'},
         {
@@ -174,29 +209,40 @@ data: () => ({
         },
         { text: 'Correo', value: 'email' },
         { text: 'Estado', value: 'estado' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: 'Acciones', value: 'actions', sortable: false },
       ],
+      rolItems: [
+        'Administrador',
+        'Vendedor',
+        'Almacenero'
+      ],
+      switchEstado: false,
+      buttonLoading: false,
       usuarios: [],
       categorias: [],
       editedIndex: -1,
       editedItem: {
-        id: 0,
+        id: '',
         nombre: '',
+        password: '',
         email: '',
         estado: 0,
+        Rol:''
       },
       defaultItem: {
-        id: 0,
+        id: '',
         nombre: '',
+        password: '',
         email: '',
         estado: 0,
+        Rol:''
       },
     }),
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'Nueva categoría' : 'Editar categoría'
-      },
+        return this.editedIndex === -1 ? 'Nuevo Usuario' : 'Editar Usuario'
+      }
     },
 
     watch: {
@@ -219,10 +265,13 @@ data: () => ({
           headers:{
             'Token': localStorage.getItem('token')
           }
-        }) // Consume la appi
+        })
         .then(
           response => {
-            this.usuarios = response.data;
+            const userData = response.data.map(
+              user => user.estado === 1 ? {...user, estado: 'Activo'} : {...user, estado: 'Inactivo'}
+            );
+            this.usuarios = userData;
             this.cargando = false;
           }
         )
@@ -233,19 +282,58 @@ data: () => ({
 
       editItem (item) {
         this.editedIndex = item.id
+        this.switchEstado = Boolean(item.estado)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
 
       deleteItem (item) {
         this.editedIndex = item.id
+        this.switchEstado = Boolean(item.estado)
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
       },
 
+      enableUser () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/usuario/activate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.list();
+          this.buttonLoading = false;
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
+      },
+
+      disableUser () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/usuario/deactivate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.buttonLoading = false;
+          this.list();
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
+      },
+
       deleteItemConfirm () {
         if (this.editedItem.estado === 1) {
-          axios.put("http://localhost:3000/api/categoria/deactivate", { // Consume la appi
+          this.switchEstado = false;
+          axios.put("http://localhost:3000/api/usuario/deactivate", {
             "id": this.editedItem.id,
           }, {
           headers:{
@@ -257,8 +345,10 @@ data: () => ({
             }).catch(error => {
               return error;
             })
-        } else {
-            axios.put("http://localhost:3000/api/categoria/activate", { // Consume la appi
+        } 
+        else {  
+          this.switchEstado = true;
+          axios.put("http://localhost:3000/api/usuario/activate", {
             "id": this.editedItem.id,
           }, {
           headers:{
@@ -293,10 +383,10 @@ data: () => ({
 
       save () {
         if (this.editedIndex > -1) {
-          axios.put("http://localhost:3000/api/categoria/update", { // Consume la appi
-            "id": this.editedItem.id,
+          axios.put("http://localhost:3000/api/usuario/update", {
             "nombre": this.editedItem.nombre,
-            "descripcion": this.editedItem.descripcion
+            "rol": this.editedItem.Rol,
+            "email": this.editedItem.email
           }, {
           headers:{
             'Token': localStorage.getItem('token')
@@ -309,10 +399,11 @@ data: () => ({
             })
           // Object.assign(this.desserts[this.editedIndex], this.editedItem)
         } else {
-            axios.post("http://localhost:3000/api/categoria/add", { // Consume la appi
+            axios.post("http://localhost:3000/api/usuario/add", {
             "nombre": this.editedItem.nombre,
-            "descripcion": this.editedItem.descripcion,
-            "estado": 1
+            "password": this.editedItem.password,
+            "email": this.editedItem.email,
+            "rol": this.editedItem.Rol
           }, {
           headers:{
             'Token': localStorage.getItem('token')

@@ -47,10 +47,7 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
-                      v-model="editedItem.id"
-                      label="ID"
-                    ></v-text-field>
+                  
                   </v-col>
 
                   <v-col
@@ -76,6 +73,35 @@
                       auto-grow
                     ></v-textarea>
                   </v-col> 
+
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                    v-if="editedIndex !== -1"
+                  >
+                    <v-row
+                      align="center"
+                      justify="space-around"
+                    >
+                      <v-btn 
+                        @click="enableCategory()" 
+                        color="success"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Habilitar
+                      </v-btn>
+                      <v-btn 
+                        @click="disableCategory()" 
+                        color="error"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Deshabilitar
+                      </v-btn>
+                    </v-row>
+                  </v-col>
 
                 </v-row>
               </v-container>
@@ -154,7 +180,7 @@ name: 'DataTableCategoria',
 data: () => ({
       dialog: false,
       dialogDelete: false,
-      cargando: false, // Cambiar a true cuando hayan registros en la base de datos
+      cargando: true, 
       headers: [
         { text: 'ID', value: 'id'},
         {
@@ -165,8 +191,9 @@ data: () => ({
         },
         { text: 'Descripción', value: 'descripcion' },
         { text: 'Estado', value: 'estado' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: 'Acciones', value: 'actions', sortable: false },
       ],
+      buttonLoading: false,
       categorias: [],
       editedIndex: -1,
       editedItem: {
@@ -208,7 +235,10 @@ data: () => ({
         }) // Consume la appi
         .then(
           response => {
-            this.categorias = response.data;
+            const userData = response.data.map(
+            category => category.estado === 1 ? {...category, estado: 'Activo'} : {...category, estado: 'Inactivo'}
+            );
+            this.categorias = userData;
             this.cargando = false;
           }
         )
@@ -227,6 +257,42 @@ data: () => ({
         this.editedIndex = item.id
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
+      },
+
+       enableCategory () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/categoria/activate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.list();
+          this.buttonLoading = false;
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
+      },
+
+      disableCategory () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/categoria/deactivate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.buttonLoading = false;
+          this.list();
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
       },
 
       deleteItemConfirm () {
@@ -297,8 +363,8 @@ data: () => ({
         } else {
             axios.post("http://localhost:3000/api/categoria/add", { // Consume la appi
             "nombre": this.editedItem.nombre,
-            "descripcion": this.editedItem.descripcion,
-            //"estado": 1
+            "descripcion": this.editedItem.descripcion
+            
           }, {
           headers:{
             'Token': localStorage.getItem('token')

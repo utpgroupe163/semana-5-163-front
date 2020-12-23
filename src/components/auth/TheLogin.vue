@@ -1,52 +1,46 @@
 <template>
-  <v-layout>
-    <v-flex>
-      <v-row
-        align="center"
-        align-content="center"
-        style="height:70%vh"
-      >
-        <v-col>
-          <v-card class="pa-12">
-            <v-card-title
-            title>
-              Formulario de login • 163-Group
-            </v-card-title>
-            <v-form
-              ref="form"
-              lazy-validation
-            >
-              <v-text-field
-                v-model="login.email"
-                label="E-mail"
-                required
-              ></v-text-field>
+  <v-layout align-center justify-center class="generic_background">
+    <v-flex xs12 sm8 md4>
+      <v-card class="elevation-12">
+        <v-toolbar dark color="">
+          <v-toolbar-title>Acceso Zona Gestión</v-toolbar-title>
+        </v-toolbar>
+        <v-card-text>
+          <v-form ref="form" lazy-validation>
+            <v-text-field
+              v-model="login.email"
+              name="login"
+              label="Email"
+              id="login"
+              type="text"
+              required
+            ></v-text-field>
+            <v-text-field
+              v-model="login.password"
+              name="password"
+              label="Contraseña"
+              id="password"
+              type="password"
+              required
 
-              <v-text-field
-                v-model="login.password"
-                label="Contraseña"
-                type="password"
-                required
-              ></v-text-field>
-
-              <v-btn
-                :disabled="!(this.login.email && this.login.password)"
-                color="success"
-                class="mr-4"
-                block
-                @click="loginUser"
-              >
-                Login
-              </v-btn>
-
-            </v-form>
-          </v-card>
-        </v-col>
-      </v-row>
+            ></v-text-field>
+          </v-form>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn 
+             
+            color="blue" 
+            :disabled="!(this.login.email && this.login.password)" 
+            @click="loginUser"
+          >
+            Ingresar
+          </v-btn>
+        </v-card-actions>
+      </v-card>
     </v-flex>
   </v-layout>
-
-</template>
+</template> 
 
 <script>
 import swal from "sweetalert";
@@ -88,3 +82,9 @@ export default {
   }
 }
 </script>
+<style scoped>
+  .generic_background {
+    background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+  }
+</style>
