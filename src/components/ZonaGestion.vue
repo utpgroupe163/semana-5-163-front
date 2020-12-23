@@ -1,7 +1,7 @@
 <template>
-    <v-app id="inspire">
+    <v-app id="inspire" >
     
-    <v-app-bar app>
+    <v-app-bar app >
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title>Zona de Gestión (Grupo 163 • UTP)</v-toolbar-title>
@@ -20,6 +20,7 @@
       v-model="drawer"
       fixed
       temporary
+      
     >
       <v-card
     class="mx-auto"
@@ -49,7 +50,7 @@
     </v-card>
     </v-navigation-drawer>
 
-    <v-main class="grey lighten-2">
+    <v-main class="generic_background">
       <v-container>
         <router-view />
       </v-container>
@@ -84,3 +85,10 @@ name: 'ZonaGestion',
     }
 }
 </script>
+
+<style scoped>
+  .generic_background {
+    background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+  }
+</style>
