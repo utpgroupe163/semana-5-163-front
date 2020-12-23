@@ -237,7 +237,7 @@ data: () => ({
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'NuevO artículo' : 'Editar artículo'
+        return this.editedIndex === -1 ? 'Nuevo artículo' : 'Editar artículo'
       },
     },
 

@@ -48,23 +48,25 @@
                     md="12"
                   >
                     <v-text-field
-                      v-model="editedItem.id"
-                      label="ID"
-                    ></v-text-field>
-                  </v-col>
-
-                  <v-col
-                    cols="12"
-                    sm="12"
-                    md="12"
-                  >
-                    <v-text-field
                       v-model="editedItem.nombre"
                       label="Nombre"
                     ></v-text-field>
                   </v-col>
 
                   <v-col
+                    v-if="editedIndex === -1"
+                    cols="12"
+                    sm="12"
+                    md="12"
+                  >
+                    <v-text-field
+                      v-model="editedItem.password"
+                      label="Password"
+                    ></v-text-field>
+                  </v-col>
+
+                  <v-col
+                    v-if="editedIndex === -1"
                     cols="12"
                     sm="12"
                     md="12"
@@ -80,10 +82,13 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
-                      v-model="editedItem.estado"
-                      label="Estado"
-                    ></v-text-field>
+                    <v-select
+                      v-model="editedItem.Rol"
+                      label="Rol"
+                      :items="rolItems"
+                      return-object
+                      single-line
+                    ></v-select>
                   </v-col>
 
                 </v-row>
@@ -174,29 +179,38 @@ data: () => ({
         },
         { text: 'Correo', value: 'email' },
         { text: 'Estado', value: 'estado' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: 'Acciones', value: 'actions', sortable: false },
+      ],
+      rolItems: [
+        'Administrador',
+        'Vendedor',
+        'Almacenero'
       ],
       usuarios: [],
       categorias: [],
       editedIndex: -1,
       editedItem: {
-        id: 0,
+        id: '',
         nombre: '',
+        password: '',
         email: '',
         estado: 0,
+        Rol:''
       },
       defaultItem: {
-        id: 0,
+        id: '',
         nombre: '',
+        password: '',
         email: '',
         estado: 0,
+        Rol:''
       },
     }),
 
     computed: {
       formTitle () {
-        return this.editedIndex === -1 ? 'Nueva categoría' : 'Editar categoría'
-      },
+        return this.editedIndex === -1 ? 'Nuevo Usuario' : 'Editar Usuario'
+      }
     },
 
     watch: {
@@ -219,10 +233,11 @@ data: () => ({
           headers:{
             'Token': localStorage.getItem('token')
           }
-        }) // Consume la appi
+        })
         .then(
           response => {
-            this.usuarios = response.data;
+            let apiData = response.data;
+            this.usuarios = apiData;
             this.cargando = false;
           }
         )
@@ -245,7 +260,7 @@ data: () => ({
 
       deleteItemConfirm () {
         if (this.editedItem.estado === 1) {
-          axios.put("http://localhost:3000/api/categoria/deactivate", { // Consume la appi
+          axios.put("http://localhost:3000/api/usuario/deactivate", { // Consume la appi
             "id": this.editedItem.id,
           }, {
           headers:{
@@ -258,7 +273,7 @@ data: () => ({
               return error;
             })
         } else {
-            axios.put("http://localhost:3000/api/categoria/activate", { // Consume la appi
+            axios.put("http://localhost:3000/api/usuario/activate", { // Consume la appi
             "id": this.editedItem.id,
           }, {
           headers:{
@@ -293,10 +308,10 @@ data: () => ({
 
       save () {
         if (this.editedIndex > -1) {
-          axios.put("http://localhost:3000/api/categoria/update", { // Consume la appi
-            "id": this.editedItem.id,
+          axios.put("http://localhost:3000/api/usuario/update", { // Consume la appi
             "nombre": this.editedItem.nombre,
-            "descripcion": this.editedItem.descripcion
+            "rol": this.editedItem.Rol,
+            "email": this.editedItem.email
           }, {
           headers:{
             'Token': localStorage.getItem('token')
@@ -309,10 +324,11 @@ data: () => ({
             })
           // Object.assign(this.desserts[this.editedIndex], this.editedItem)
         } else {
-            axios.post("http://localhost:3000/api/categoria/add", { // Consume la appi
+            axios.post("http://localhost:3000/api/usuario/add", { // Consume la appi
             "nombre": this.editedItem.nombre,
-            "descripcion": this.editedItem.descripcion,
-            "estado": 1
+            "password": this.editedItem.password,
+            "email": this.editedItem.email,
+            "rol": this.editedItem.Rol
           }, {
           headers:{
             'Token': localStorage.getItem('token')
