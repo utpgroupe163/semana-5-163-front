@@ -62,6 +62,7 @@
                     <v-text-field
                       v-model="editedItem.password"
                       label="Password"
+                      :type="'password'"
                     ></v-text-field>
                   </v-col>
 
@@ -95,12 +96,29 @@
                     cols="12"
                     sm="12"
                     md="12"
+                    v-if="editedIndex !== -1"
                   >
-                    <v-switch
-                      v-model="switchEstado"
-                      v-on:click="deleteItemConfirm()"
-                      :label="switchEstado ? 'Activo' : 'Inactivo'"
-                    ></v-switch>
+                    <v-row
+                      align="center"
+                      justify="space-around"
+                    >
+                      <v-btn 
+                        @click="enableUser()" 
+                        color="success"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Habilitar
+                      </v-btn>
+                      <v-btn 
+                        @click="disableUser()" 
+                        color="error"
+                        :loading="buttonLoading"
+                        :disabled="buttonLoading"
+                      >
+                        Deshabilitar
+                      </v-btn>
+                    </v-row>
                   </v-col>
 
                 </v-row>
@@ -199,6 +217,7 @@ data: () => ({
         'Almacenero'
       ],
       switchEstado: false,
+      buttonLoading: false,
       usuarios: [],
       categorias: [],
       editedIndex: -1,
@@ -273,6 +292,42 @@ data: () => ({
         this.switchEstado = Boolean(item.estado)
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
+      },
+
+      enableUser () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/usuario/activate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.list();
+          this.buttonLoading = false;
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
+      },
+
+      disableUser () {
+        this.buttonLoading = true;
+        axios.put("http://localhost:3000/api/usuario/deactivate", {
+            "id": this.editedItem.id,
+          }, {
+            headers: {
+              'Token': localStorage.getItem('token')
+          }
+        })
+        .then(response => {
+          this.buttonLoading = false;
+          this.list();
+        }).catch(error => {
+          this.buttonLoading = false;
+          return error;
+        })
       },
 
       deleteItemConfirm () {

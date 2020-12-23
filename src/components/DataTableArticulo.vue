@@ -47,10 +47,7 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
-                      v-model="editedItem.id"
-                      label="ID"
-                    ></v-text-field>
+                  
                   </v-col>
 
                   <v-col
@@ -77,7 +74,7 @@
                       auto-grow
                     ></v-textarea>
                   </v-col> 
-
+      
                    <v-col
                     cols="12"
                     sm="12"
@@ -109,10 +106,7 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
-                      v-model="editedItem.estado"
-                      label="Estado"
-                    ></v-text-field>
+                  
                   </v-col>
 
                 </v-row>
@@ -201,7 +195,7 @@ data: () => ({
           sortable: true,
           value: 'nombre',
         },
-        { text: 'Categoría', value: 'categoria.nombre' },
+        // { text: 'Categoría', value: 'categoria.nombre' },
         { text: 'Descripción', value: 'descripcion' },
         { text: 'Código', value: 'codigo' },
         { text: 'Estado', value: 'estado' },
@@ -265,8 +259,13 @@ data: () => ({
         })
         .then(
           response => {
-            this.articulos = response.data;
+            const userData = response.data.map(
+              articulo => articulo.estado === 1 ? {...articulo, estado: 'Activo'} : {...articulo, estado: 'Inactivo'}
+            );
+            this.articulos = userData;
             this.cargando = false;
+            this.list();
+            
           }
         )
         .catch(error=> {
@@ -360,7 +359,7 @@ data: () => ({
             "nombre": this.editedItem.nombre,
             "descripcion": this.editedItem.descripcion,
             "codigo": this.editedItem.codigo,
-            "categoria": this.categoria.id, // verificar nombre en back
+            "categoria": this.categoria.nombre, // verificar nombre en back
           }, {
           headers:{
             'Token': localStorage.getItem('token')
@@ -376,9 +375,9 @@ data: () => ({
             axios.post("http://localhost:3000/api/articulo/add", { // Consume la appi
             "nombre": this.editedItem.nombre,
             "descripcion": this.editedItem.descripcion,
-            "codigo": this.editedItem.codigo
-            //"categoriaId": this.categoria.id, // verificar nombre en back
-            //"estado": 1
+            "codigo": this.editedItem.codigo,
+            "categoria": this.categoria.id
+            
           }, {
           headers:{
             'Token': localStorage.getItem('token')
