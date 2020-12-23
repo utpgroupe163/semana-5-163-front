@@ -47,10 +47,10 @@
                     sm="12"
                     md="12"
                   >
-                    <v-text-field
+                    <!-- <v-text-field
                       v-model="editedItem.id"
                       label="ID"
-                    ></v-text-field>
+                    ></v-text-field> -->
                   </v-col>
 
                   <v-col
@@ -154,7 +154,7 @@ name: 'DataTableCategoria',
 data: () => ({
       dialog: false,
       dialogDelete: false,
-      cargando: false, // Cambiar a true cuando hayan registros en la base de datos
+      cargando: true, 
       headers: [
         { text: 'ID', value: 'id'},
         {
@@ -165,7 +165,7 @@ data: () => ({
         },
         { text: 'Descripción', value: 'descripcion' },
         { text: 'Estado', value: 'estado' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: 'Acciones', value: 'actions', sortable: false },
       ],
       categorias: [],
       editedIndex: -1,
@@ -208,7 +208,10 @@ data: () => ({
         }) // Consume la appi
         .then(
           response => {
-            this.categorias = response.data;
+            const userData = response.data.map(
+            category => category.estado === 1 ? {...category, estado: 'Activo'} : {...category, estado: 'Inactivo'}
+            );
+            this.categorias = userData;
             this.cargando = false;
           }
         )
@@ -297,8 +300,8 @@ data: () => ({
         } else {
             axios.post("http://localhost:3000/api/categoria/add", { // Consume la appi
             "nombre": this.editedItem.nombre,
-            "descripcion": this.editedItem.descripcion,
-            //"estado": 1
+            "descripcion": this.editedItem.descripcion
+            
           }, {
           headers:{
             'Token': localStorage.getItem('token')

@@ -192,20 +192,20 @@ name: 'DataTableArticulo',
 data: () => ({
       dialog: false,
       dialogDelete: false,
-      cargando: false, // Cambiar a true cuando hayan registros en la base de datos
+      cargando: true, 
       headers: [
         { text: 'ID', value: 'id'},
         {
           text: 'Artículo',
           align: 'start',
           sortable: true,
-          value: 'nombre', //Igual a como se llame en el modelo
+          value: 'nombre',
         },
         { text: 'Categoría', value: 'categoria.nombre' },
         { text: 'Descripción', value: 'descripcion' },
         { text: 'Código', value: 'codigo' },
         { text: 'Estado', value: 'estado' },
-        { text: 'Actions', value: 'actions', sortable: false },
+        { text: 'Acciones', value: 'actions', sortable: false },
       ],
       articulos: [],
       categoria: [],
@@ -262,10 +262,10 @@ data: () => ({
           headers:{
             'Token': localStorage.getItem('token')
           }
-        }) // Consume la appi
+        })
         .then(
           response => {
-            this.articulo = response.data;
+            this.articulos = response.data;
             this.cargando = false;
           }
         )
@@ -279,7 +279,7 @@ data: () => ({
           headers:{
             'Token': localStorage.getItem('token')
           }
-        }) // Consume la appi
+        })
         .then(
           response => {
             this.categorias = response.data;

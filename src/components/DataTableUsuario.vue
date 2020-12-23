@@ -91,6 +91,18 @@
                     ></v-select>
                   </v-col>
 
+                  <v-col
+                    cols="12"
+                    sm="12"
+                    md="12"
+                  >
+                    <v-switch
+                      v-model="switchEstado"
+                      v-on:click="deleteItemConfirm()"
+                      :label="switchEstado ? 'Activo' : 'Inactivo'"
+                    ></v-switch>
+                  </v-col>
+
                 </v-row>
               </v-container>
             </v-card-text>
@@ -120,7 +132,7 @@
             <v-card-actions>
               <v-spacer></v-spacer>
               <v-btn color="blue darken-1" text @click="closeDelete">Cancel</v-btn>
-              <v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn>
+              <!--v-btn color="blue darken-1" text @click="deleteItemConfirm">OK</v-btn-->
               <v-spacer></v-spacer>
             </v-card-actions>
           </v-card>
@@ -168,7 +180,7 @@ name: 'DataTableUsuario',
 data: () => ({
       dialog: false,
       dialogDelete: false,
-      cargando: false, // Cambiar a true cuando hayan registros en la base de datos
+      cargando: true, 
       headers: [
         { text: 'ID', value: 'id'},
         {
@@ -186,6 +198,7 @@ data: () => ({
         'Vendedor',
         'Almacenero'
       ],
+      switchEstado: false,
       usuarios: [],
       categorias: [],
       editedIndex: -1,
@@ -236,8 +249,10 @@ data: () => ({
         })
         .then(
           response => {
-            let apiData = response.data;
-            this.usuarios = apiData;
+            const userData = response.data.map(
+              user => user.estado === 1 ? {...user, estado: 'Activo'} : {...user, estado: 'Inactivo'}
+            );
+            this.usuarios = userData;
             this.cargando = false;
           }
         )
@@ -248,19 +263,22 @@ data: () => ({
 
       editItem (item) {
         this.editedIndex = item.id
+        this.switchEstado = Boolean(item.estado)
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
 
       deleteItem (item) {
         this.editedIndex = item.id
+        this.switchEstado = Boolean(item.estado)
         this.editedItem = Object.assign({}, item)
         this.dialogDelete = true
       },
 
       deleteItemConfirm () {
         if (this.editedItem.estado === 1) {
-          axios.put("http://localhost:3000/api/usuario/deactivate", { // Consume la appi
+          this.switchEstado = false;
+          axios.put("http://localhost:3000/api/usuario/deactivate", {
             "id": this.editedItem.id,
           }, {
           headers:{
@@ -272,8 +290,10 @@ data: () => ({
             }).catch(error => {
               return error;
             })
-        } else {
-            axios.put("http://localhost:3000/api/usuario/activate", { // Consume la appi
+        } 
+        else {  
+          this.switchEstado = true;
+          axios.put("http://localhost:3000/api/usuario/activate", {
             "id": this.editedItem.id,
           }, {
           headers:{
@@ -308,7 +328,7 @@ data: () => ({
 
       save () {
         if (this.editedIndex > -1) {
-          axios.put("http://localhost:3000/api/usuario/update", { // Consume la appi
+          axios.put("http://localhost:3000/api/usuario/update", {
             "nombre": this.editedItem.nombre,
             "rol": this.editedItem.Rol,
             "email": this.editedItem.email
@@ -324,7 +344,7 @@ data: () => ({
             })
           // Object.assign(this.desserts[this.editedIndex], this.editedItem)
         } else {
-            axios.post("http://localhost:3000/api/usuario/add", { // Consume la appi
+            axios.post("http://localhost:3000/api/usuario/add", {
             "nombre": this.editedItem.nombre,
             "password": this.editedItem.password,
             "email": this.editedItem.email,
