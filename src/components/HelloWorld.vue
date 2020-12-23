@@ -1,6 +1,7 @@
-<template>
-  <v-container>
-    <div>
+<template >
+
+  <v-container >
+    <div >
       <v-carousel>
         <v-carousel-item
           v-for="(item,i) in items"
@@ -8,7 +9,7 @@
           :src="item.src"
           reverse-transition="fade-transition"
           transition="fade-transition"
-          min-height="600"
+          min-height="450"
       ></v-carousel-item>
       </v-carousel>
     </div>
@@ -18,14 +19,15 @@
 
     <h2>NOSOTROS</h2>
     <div>
-      <v-carousel>
+      <v-carousel :show-arrows="false"  hide-delimiters>
         <v-carousel-item
           v-for="(us,i) in nosotros"
           :key="i"
           :src="us.src"
           reverse-transition="fade-transition"
           transition="fade-transition"
-          min-height="600"
+          min-height="450"
+          
       ></v-carousel-item>
       </v-carousel>
     </div>
@@ -35,7 +37,7 @@
 
     <h2 id="Servicios">SERVICIOS</h2>
     <div>
-      <v-carousel>
+      <v-carousel :show-arrows="false" hide-delimiters>
         <v-carousel-item
           v-for="(serva,i) in serv1"
           :key="i"
@@ -48,7 +50,7 @@
     </div>
 
     <div>
-      <v-carousel>
+      <v-carousel :show-arrows="false" hide-delimiters>
         <v-carousel-item
           v-for="(servb,i) in serv2"
           :key="i"
@@ -61,7 +63,7 @@
     </div>
     
     <div>
-      <v-carousel>
+      <v-carousel :show-arrows="false" hide-delimiters>
         <v-carousel-item
           v-for="(servc,i) in serv3"
           :key="i"
@@ -75,7 +77,7 @@
    
     
     <div>
-      <v-carousel>
+      <v-carousel :show-arrows="false" hide-delimiters>
         <v-carousel-item
           v-for="(servd,i) in serv4"
           :key="i"
@@ -92,14 +94,14 @@
 
     <h2 id="Precios">PRECIOS</h2>
     <div>
-      <v-carousel>
+      <v-carousel :show-arrows="false" hide-delimiters>
         <v-carousel-item
           v-for="(precio,i) in precios"
           :key="i"
           :src="precio.src"
           reverse-transition="fade-transition"
           transition="fade-transition"
-          min-height="600"
+          min-height="450"
       ></v-carousel-item>
       </v-carousel>
     </div>
@@ -125,12 +127,14 @@
 
     <v-footer
       padless
-      padless
+      
     >
       <v-card
         flat
         tile
         class="grey darken-4 white--text text-center"
+        height="350px"
+        width="1500px"
       >
         <v-card-text>
           <v-btn
@@ -159,6 +163,7 @@
       </v-card>
     </v-footer>
    </v-container>
+   
 </template>
 
 <script>
@@ -243,3 +248,10 @@
     
   }
 </script>
+
+<style scoped>
+  .generic_background {
+    background: rgb(2,0,36);
+background: linear-gradient(90deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
+  }
+</style>
